@@ -42,12 +42,13 @@ class ChatAnalyser:
             count = count + 1
             
         swapDf = pd.DataFrame(swaps, index=['swaps']).T
+        self.df = self.df.drop('dateTime', axis=1)
         self.dateSummary = self.df.groupby(['date']).sum()
         self.dateSummary['swaps'] = swapDf['swaps']
         self.dateSummary['swapsPerCharacter'] = self.dateSummary['swaps']/self.dateSummary['length']
-        self.chatSpan = (pd.to_datetime(min(self.df['dateTime'])).date(),pd.to_datetime(max(self.df['dateTime'])).date())
+        self.chatSpan = (pd.to_datetime(min(self.df['date'])).date(),pd.to_datetime(max(self.df['date'])).date())
     def getBasicStats(self):
-        return self.df.groupby(['from']).sum()
+        return self.df.drop('date', axis = 1).groupby(['from']).sum()
     def getCharRatio(self):
         basicStats = self.getBasicStats()
         return basicStats['length'][0]/basicStats['length'][1]
