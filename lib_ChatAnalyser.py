@@ -3,6 +3,7 @@ import chatReader
 import re
 import datetime
 import string
+import collections
 
 class ChatAnalyser:
     def __init__(self, paths):
@@ -65,6 +66,20 @@ class ChatAnalyser:
         joinedRolling = joined.rolling(days).sum()
         joinedRolling['ratio'] = joinedRolling['length_one']/joinedRolling['length_two']
         return joinedRolling.reset_index()
+    def getMostFrequentWords(self, party=0, count=20):
+        try:
+            #https://www.kaggle.com/datasets/rowhitswami/stopwords?resource=download
+            with open('wordlist.txt', 'r') as file:
+                stops = [line.strip().lower() for line in file.readlines()]
+        except FileNotFoundError:
+            print(f"The file 'wordlist.txt' was not found.")
+            stops = []
+
+        allWords = [x.lower() for x in ' '.join(self.df[self.df['from']==self.parties[party]]['text']).split()]
+        wordCounts = collections.Counter(allWords)
+        filteredWordCounts = {word: count for word, count in wordCounts.items() if word.lower() not in stops}
+        topWords = collections.Counter(filteredWordCounts).most_common(count)
+        return topWords
     def getDf(self):
         return self.df
         
